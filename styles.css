@@ -1,3 +1,8 @@
+header {
+    background-color: orange;
+    border: solid black 2px;
+}
+
 #general_container {
     display: flex; 
     flex-wrap: nowrap;
