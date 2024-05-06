@@ -40,35 +40,38 @@ document.addEventListener('DOMContentLoaded', function() {
     setRandomNumbers();
     calculateGoal();
 
-    for (const button of number_buttons) {
-        button.addEventListener('click', () => {
+    let first;
+    let second;
 
-            console.log("oisdjfoi");
+    append_new_display();
+
+    for (const button of number_buttons) {
+
+        button.addEventListener('click', () => {            
             if (button.classList.contains("used_number")) {
                 console.log("used num");
+                get_last_display().textContent = "";
+                reset_equation();
                 return;
             }
 
-            if (firstNumBool == false && operator == false && secondNumBool == false) {
+            if (Boolean(firstNumBool) == false && Boolean(operatorBool) == false && Boolean(secondNumBool) == false) {
                 firstNum = button.textContent;
                 firstNumBool = true;
+                first = button;
 
-                console.log("first number");
+                get_last_display().textContent += " " + firstNum;
 
                 button.classList.add("used_number"); //to prevent the user from reusing
-            } else if (firstNumBool == true && operator == true && secondNumBool == false) {
+            } else if (Boolean(firstNumBool) == true && Boolean(operatorBool) == true && Boolean(secondNumBool) == false) {
                 secondNum = button.textContent;
                 secondNumBool = true;
 
-                firstNumBool = false;
-                operatorBool = false;
-                secondNumBool = false;
+                get_last_display().textContent += " " + secondNum;
 
-                console.log("second number");
+                second = button;
 
-                button.classList.add("used_number"); //to prevent the user from reusing
-
-                display_equation();
+                display_equation(first, second);
             }
 
             
@@ -83,10 +86,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            if (firstNumBool == true) {
-                current_equation += button.textContent;
-                operator = true;
+            if (Boolean(firstNumBool) == true) {
+                operator = button.textContent;
+                operatorBool = true;
                 console.log("operation");
+
+                get_last_display().textContent += " " + operator;
             }
         });
     }
@@ -95,12 +100,53 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 
-function display_equation () {
+function display_equation (first, second) {
+
+    reset_equation();
+
+    console.log("in display function!");
+    current_equation = firstNum + " " + operator + " " + secondNum;
+
+    let result = eval(current_equation);
+
+    current_equation += " " + "=" + " " + result;
+
+    first.textContent = "";
+    first.disabled = true;
+
+    second.textContent = result;
+
+    console.log(current_equation);
+    const display_elem = get_last_display();
+    display_elem.textContent = current_equation;
+
+    append_new_display();
+    
+}
+
+function append_new_display () {
     const newH2 = document.createElement('h2');
-    newH2.textContent = current_equation;
     const workarea = document.getElementById('workarea');
     workarea.appendChild(newH2);
 }
+
+function get_last_display() {
+    return document.getElementById('workarea').lastChild;
+}
+
+
+function reset_equation () {
+    let used_buttons = document.getElementsByClassName("used_number");
+    for (const button of used_buttons) {
+        button.classList.remove("used_number");
+    }
+
+    firstNumBool = false;
+    operatorBool = false;
+    secondNumBool = false;
+}
+
+
 
 //gets a random int between 0 and max
 function getRandomInt (max) {
