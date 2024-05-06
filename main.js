@@ -34,7 +34,11 @@ var secondNum;
 var current_equation = "";
 
 document.addEventListener('DOMContentLoaded', function() {
+    //gets all button into an array
     const number_buttons = document.getElementsByClassName('number_button');
+
+    setRandomNumbers();
+    calculateGoal();
 
     for (const button of number_buttons) {
         button.addEventListener('click', () => {
@@ -96,4 +100,54 @@ function display_equation () {
     newH2.textContent = current_equation;
     const workarea = document.getElementById('workarea');
     workarea.appendChild(newH2);
+}
+
+//gets a random int between 0 and max
+function getRandomInt (max) {
+    return Math.floor(Math.random() * max) ;
+}
+
+//function to set all numberButtons to a random integer
+function setRandomNumbers (){
+    //gets all buttons into an array
+    const number_buttons = document.getElementsByClassName('number_button');
+
+    //for all the buttons
+    for (const button of number_buttons) {
+        button.textContent = getRandomInt(10) + 1; //random num between 1 and 10
+    }
+
+}
+
+function calculateGoal (){
+    console.log("calculateGoal called")
+
+    //gets all buttons into an array
+    const number_buttons = document.getElementsByClassName('number_button');
+    
+    //gets the goal display
+    const goal = document.getElementById('goal');
+
+    let operation = getRandomInt(3);
+    console.log(operation);
+
+    //gets two random number on the board that are not the same
+    let num1 = parseInt(number_buttons[getRandomInt(4)].textContent);
+    let num2 = parseInt(number_buttons[getRandomInt(4)].textContent);
+    while (num1 == num2) {
+        num2 = parseInt(number_buttons[getRandomInt(4)].textContent);
+    } 
+    
+    //runds a random operation on the numbers
+    if (operation == 0) {
+        goal.textContent = num1 + num2;
+        console.log("+");
+    } else if (operation == 1){
+        goal.textContent = num1 - num2;
+        console.log("-");
+    } else if (operation == 2){
+        goal.textContent = num1 * num2;
+        console.log("*");
+    }
+
 }
