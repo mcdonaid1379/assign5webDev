@@ -1,146 +1,222 @@
-/* document.getElementById("b1").addEventListener("click", numberDisplay);
-document.getElementById("b2").addEventListener("click", numberDisplay);
-document.getElementById("b3").addEventListener("click", numberDisplay);
-document.getElementById("b4").addEventListener("click", numberDisplay); */
+/**
+ * Created by Sunil Jain and Aiden McDonald
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
 
-/* 
-Whenever we get to it, we need to make the goal attainable using the numbers on the board. 
- 
-Sunil idea: 
 
-we have 4 numbers and 3 operations
-we need a number that can be calculated using these
-
-instead of doing math to figure out what numbers can be calculated with what:
-
-pick two random numbers
-pick a random operation
-
-repeat a few times
-
-and you have a goal
-
-end Sunil idea
-*/
-
+// initially setting these flags to false. These flags indicate that the first number, operator, and second number have not been found
 var firstNumBool = false;
 var operatorBool = false;
 var secondNumBool = false;
 
+// these hold the values of the first num , operator, and second num that are from the buttons the user clicks
 var firstNum;
 var operator;
 var secondNum;
 
+// this holds the equation that is to be displayed in the work area
 var current_equation = "";
 
-document.addEventListener('DOMContentLoaded', function() {
+// this is the final goal to be calculated at the start of each game and is referenced in the win condition
+let final_goal = 0;
+
+document.addEventListener('DOMContentLoaded', function () {
     //gets all button into an array
     const number_buttons = document.getElementsByClassName('number_button');
 
     setRandomNumbers();
     calculateGoal();
 
+    // these hold the first and second number buttons the user clicks 
     let first;
     let second;
 
+    // this creates the first initial h2 that is in the work area to display the equation
     append_new_display();
 
+    // the buttons with the numbers in them have the class "number_button"
     for (const button of number_buttons) {
+        button.addEventListener('click', () => {
 
-        button.addEventListener('click', () => {            
+            // if the clicked button has already been clicked, it will be marked as "used_number" this checks for that and doesnt allow the user to use it again.
             if (button.classList.contains("used_number")) {
                 console.log("used num");
-                get_last_display().textContent = "";
-                reset_equation();
+                get_last_display().textContent = ""; // this resets the equation that is slowly being built as the user clicks the first, second, and operator buttons
+                reset_equation(); // this resets the permissions on the buttons that have been already clicked
                 return;
             }
-
+            
+            
+            /* the first number can only be found if: 
+                1. the first number hasnt been found 
+                2. the operator hasnt been found
+                3. the second number hasnt been found
+             */
             if (Boolean(firstNumBool) == false && Boolean(operatorBool) == false && Boolean(secondNumBool) == false) {
-                firstNum = button.textContent;
-                firstNumBool = true;
-                first = button;
+                firstNum = button.textContent; 
+                firstNumBool = true; // we found the first number
+                first = button; // keep track of the first button
 
+                // build the equation and display it to the user as they click buttons
                 get_last_display().textContent += " " + firstNum;
 
                 button.classList.add("used_number"); //to prevent the user from reusing
+
+            /* the second number can only be found if: 
+                1. the first number has been found
+                2. the operator has been found
+                3. the second number hasnt been found
+             */
             } else if (Boolean(firstNumBool) == true && Boolean(operatorBool) == true && Boolean(secondNumBool) == false) {
                 secondNum = button.textContent;
-                secondNumBool = true;
+                secondNumBool = true; // we found the second button
+                second = button; // keep track of the second button
 
+                // build the equation and display it to the user as they click buttons
                 get_last_display().textContent += " " + secondNum;
 
-                second = button;
-
+                // since all equation components have been found, we need to calculate and display it!
                 display_equation(first, second);
             }
-
-            
-            
         });
     }
 
+    // the buttons with the operators in them have the class "number_button"
     const operation_buttons = document.getElementsByClassName('operation_button');
     for (const button of operation_buttons) {
         button.addEventListener('click', () => {
-            if (button.classList.contains("used_operation")) {
+            // if the operation has already been clicked do not allow the user to append it to the equation
+            if (button.classList.contains("used_operator")) {
                 return;
             }
 
+            // if the first number has been found, we can get the second equation component, the operator!
             if (Boolean(firstNumBool) == true) {
                 operator = button.textContent;
-                operatorBool = true;
-                console.log("operation");
+                operatorBool = true; // we found an operator!
 
-                get_last_display().textContent += " " + operator;
+                // build the equation and display it to the user as they click buttons
+                get_last_display().textContent += " " + operator; 
             }
         });
     }
-
-
-
 });
 
-function display_equation (first, second) {
+function display_equation(first, second) {
 
+    // reset all permissions on the buttons except the "disable" property (that will be reset in the new_game() function) 
     reset_equation();
 
-    console.log("in display function!");
+    // piece together the equation as a whole
     current_equation = firstNum + " " + operator + " " + secondNum;
 
+    // evaluate that equation
     let result = eval(current_equation);
 
+    // check if the result is equal to the final goal we randomly set
+    if (parseInt(result) === parseInt(final_goal)) { // win condition
+
+        // add 1 to the wins display
+        wins_display = document.getElementById("wins_display")
+
+        // get the last character of the textcontent (the actual wins)
+        current_wins = parseInt(wins_display.textContent.charAt(wins_display.textContent.length - 1));
+        
+
+        if (isNaN(current_wins)) { // check if we can parseInt() correctly 
+            current_wins = 0; // make sure we are dealing with an integer
+        }
+
+        // increment
+        current_wins++;
+
+        // display the incremented text content
+        wins_display.textContent = "Wins: " + current_wins;
+
+    }
+
+    // append the result to the equation
     current_equation += " " + "=" + " " + result;
 
+    // make the first number button blank and disabled
     first.textContent = "";
     first.disabled = true;
+    first.classList.add("blank");
 
+    // store the result in the second number button 
     second.textContent = result;
 
-    console.log(current_equation);
+    // get all the buttons that are blank
+    let blank_buttons = document.getElementsByClassName("blank");
+
+    // since we are playing with 4 total numbers, if 3 of those are used up and blank, the player cannot make any more operations
+    // in this case they lose!
+    if (blank_buttons.length == 3) { // lose condition
+
+        // add one to the end 
+        lose_display = document.getElementById("lose_display")
+
+        // get the last character of the textcontent (the actual losses)
+        current_losses = parseInt(lose_display.textContent.charAt(lose_display.textContent.length - 1));
+
+        if (isNaN(current_losses)) { // check if we can parseInt() correctly 
+            current_losses = 0; // make sure we are dealing with an integer
+        }
+
+        // increment
+        current_losses++;
+
+        // display the incremented text content
+        lose_display.textContent = "Losses: " + current_losses;
+    }
+
+    // get the last display element in the work area and set it to the complete equation created by the user
     const display_elem = get_last_display();
     display_elem.textContent = current_equation;
 
+    // add another display below that for the next equation
     append_new_display();
-    
+
 }
 
-function append_new_display () {
+// appends a new h2 to the work area for the next display
+function append_new_display() {
     const newH2 = document.createElement('h2');
     const workarea = document.getElementById('workarea');
     workarea.appendChild(newH2);
 }
 
+// gets the last h2 in the work area
 function get_last_display() {
     return document.getElementById('workarea').lastChild;
 }
 
+// resets the equation and button "used" permission
+function reset_equation() {
 
-function reset_equation () {
+    // resets the numbers that have been used already
     let used_buttons = document.getElementsByClassName("used_number");
     for (const button of used_buttons) {
         button.classList.remove("used_number");
     }
 
+    // resets the operators that have been used already
+    let used_operators = document.getElementsByClassName("used_operator");
+    for (const button of used_operators) {
+        button.classList.remove("used_operator");
+    }
+
+    /* let blank_buttons = document.getElementsByClassName("blank"); RESET BLANK BUTTONS WHEN resetting the game!
+    for (const button of used_buttons) {
+        button.classList.remove("blank");
+    } */
+
+    // resets what has been found
     firstNumBool = false;
     operatorBool = false;
     secondNumBool = false;
@@ -149,12 +225,12 @@ function reset_equation () {
 
 
 //gets a random int between 0 and max
-function getRandomInt (max) {
-    return Math.floor(Math.random() * max) ;
+function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
 }
 
 //function to set all numberButtons to a random integer
-function setRandomNumbers (){
+function setRandomNumbers() {
     //gets all buttons into an array
     const number_buttons = document.getElementsByClassName('number_button');
 
@@ -165,12 +241,12 @@ function setRandomNumbers (){
 
 }
 
-function calculateGoal (){
+function calculateGoal() {
     console.log("calculateGoal called")
 
     //gets all buttons into an array
     const number_buttons = document.getElementsByClassName('number_button');
-    
+
     //gets the goal display
     const goal = document.getElementById('goal');
 
@@ -182,18 +258,23 @@ function calculateGoal (){
     let num2 = parseInt(number_buttons[getRandomInt(4)].textContent);
     while (num1 == num2) {
         num2 = parseInt(number_buttons[getRandomInt(4)].textContent);
-    } 
-    
-    //runds a random operation on the numbers
+    }
+
+    //runs a random operation on the numbers
     if (operation == 0) {
         goal.textContent = num1 + num2;
+        final_goal = num1 + num2; // setting the final goal
         console.log("+");
-    } else if (operation == 1){
+    } else if (operation == 1) {
         goal.textContent = num1 - num2;
+        final_goal = num1 - num2; // setting the final goal
         console.log("-");
-    } else if (operation == 2){
+    } else if (operation == 2) {
         goal.textContent = num1 * num2;
+        final_goal = num1 * num2; // setting the final goal
         console.log("*");
     }
+
+    console.log("final goal: " + final_goal);
 
 }
