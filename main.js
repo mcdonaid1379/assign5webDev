@@ -26,6 +26,33 @@ var current_equation = "";
 let final_goal = 0;
 
 document.addEventListener('DOMContentLoaded', function () {
+    runGame();
+
+    const newGameButton = document.getElementById("new_game");
+    newGameButton.addEventListener('click', resetGame);
+});
+
+function resetGame() {
+    //TODO: reset the game
+    //call the reset functions and set them to blank
+    //call run game
+    reset_equation();
+    let blank_buttons = document.getElementsByClassName("blank");
+    for (const button of blank_buttons) {
+        button.classList.remove("blank");
+        button.disabled = false;
+    }
+
+    const workarea = document.getElementById("workarea");
+    for (const child of workarea.children) {
+        workarea.removeChild(child);
+    }
+
+    runGame();
+}
+
+function runGame() {
+    
     //gets all button into an array
     const number_buttons = document.getElementsByClassName('number_button');
 
@@ -56,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 1. the first number hasnt been found 
                 2. the operator hasnt been found
                 3. the second number hasnt been found
-             */
+                */
             if (Boolean(firstNumBool) == false && Boolean(operatorBool) == false && Boolean(secondNumBool) == false) {
                 firstNum = button.textContent; 
                 firstNumBool = true; // we found the first number
@@ -71,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 1. the first number has been found
                 2. the operator has been found
                 3. the second number hasnt been found
-             */
+                */
             } else if (Boolean(firstNumBool) == true && Boolean(operatorBool) == true && Boolean(secondNumBool) == false) {
                 secondNum = button.textContent;
                 secondNumBool = true; // we found the second button
@@ -82,6 +109,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // since all equation components have been found, we need to calculate and display it!
                 display_equation(first, second);
+
+
             }
         });
     }
@@ -105,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
-});
+}
 
 function display_equation(first, second) {
 
@@ -210,11 +239,6 @@ function reset_equation() {
     for (const button of used_operators) {
         button.classList.remove("used_operator");
     }
-
-    /* let blank_buttons = document.getElementsByClassName("blank"); RESET BLANK BUTTONS WHEN resetting the game!
-    for (const button of used_buttons) {
-        button.classList.remove("blank");
-    } */
 
     // resets what has been found
     firstNumBool = false;
