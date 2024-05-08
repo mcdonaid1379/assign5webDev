@@ -33,14 +33,15 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function resetGame() {
-    //TODO: reset the game
-    //call the reset functions and set them to blank
-    //call run game
-    reset_equation();
     let blank_buttons = document.getElementsByClassName("blank");
     for (const button of blank_buttons) {
         button.classList.remove("blank");
+    }
+
+    const disabled = document.getElementsByClassName('number_button');
+    for (const button of disabled){
         button.disabled = false;
+        button.classList.remove("used_number");
     }
 
     const workarea = document.getElementById("workarea");
@@ -48,10 +49,24 @@ function resetGame() {
         workarea.removeChild(child);
     }
 
+    for (const child of workarea.children) {
+        workarea.removeChild(child);
+    }
+
+
+
+    reset_equation();
+
     runGame();
 }
 
 function runGame() {
+    firstNumBool = false;
+    operatorBool = false;
+    secondNumBool = false;
+
+    final_goal = 0;
+    current_equation = "";
     
     //gets all button into an array
     const number_buttons = document.getElementsByClassName('number_button');
